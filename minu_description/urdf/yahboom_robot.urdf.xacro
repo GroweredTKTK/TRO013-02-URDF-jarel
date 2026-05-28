@@ -215,7 +215,48 @@
   </joint>
 
   <!-- ============================================================ -->
-  <!-- ANALÜÜSI ÜLESANDED                                          -->
+  <!-- TODO: LISA SIIA OMA UUS ANDUR                               -->
+  <!-- ============================================================ -->
+  <!--
+  Lisa robotile uus andur (nt ultraheli, bumper vms). Vaja on:
+
+  1. UUS LINK — anduri füüsiline kehaosa:
+     <link name="sonar_link">
+       <visual>
+         <geometry>
+           <cylinder radius="0.008" length="0.015"/>   (voi box/sphere)
+         </geometry>
+         <material name="sonar_silver">
+           <color rgba="0.7 0.7 0.7 1.0"/>
+         </material>
+       </visual>
+       <collision>
+         <geometry>
+           <cylinder radius="0.008" length="0.015"/>
+         </geometry>
+       </collision>
+       <xacro:cylinder_inertia m="0.01" r="0.008" l="0.015"/>
+     </link>
+
+  2. UUS JOINT — uhendab anduri base_link-iga:
+     <joint name="sonar_joint" type="fixed">
+       <parent link="base_link"/>
+       <child link="sonar_link"/>
+       <origin xyz="0.08 0 0.03" rpy="0 0 0"/>
+     </joint>
+
+  Parast lisamist:
+    cd /workspace/ros2_ws
+    colcon build --packages-select minu_description
+    source install/setup.bash
+    ros2 launch minu_description display.launch.py
+  -->
+
+  <!-- TODO: eemalda see kommentaar ja lisa oma link + joint SIIA -->
+
+
+  <!-- ============================================================ -->
+  <!-- ANALUUSI ULESANDED (vasta vastused_moodul02.md failis)       -->
   <!-- ============================================================ -->
   <!--
   Ülesanne 1: Ava see fail ja vasta küsimustele:
