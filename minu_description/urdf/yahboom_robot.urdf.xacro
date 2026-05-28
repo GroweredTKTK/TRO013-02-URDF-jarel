@@ -1,0 +1,241 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="yahboom_microros">
+
+  <!-- ============================================================ -->
+  <!-- Mõõtmed (STEP failist mõõdetud, meetrites)                   -->
+  <!-- ============================================================ -->
+  <xacro:property name="wheel_radius"    value="0.024"/>
+  <xacro:property name="wheel_width"     value="0.0215"/>
+  <xacro:property name="wheel_mass"      value="0.05"/>
+  <xacro:property name="track_width"     value="0.1315"/>   <!-- vasak-parem rattakeskuste vahe -->
+  <xacro:property name="wheelbase"       value="0.095"/>    <!-- ees-taga rattakeskuste vahe -->
+
+  <xacro:property name="body_length"     value="0.163"/>
+  <xacro:property name="body_width"      value="0.108"/>
+  <xacro:property name="body_height"     value="0.050"/>
+  <xacro:property name="body_mass"       value="1.5"/>
+
+  <!-- Mesh offset: nihutab STEP-mesh nii et base_link on rattatelgede kõrgusel -->
+  <xacro:property name="mesh_offset_z"   value="0.0212"/>
+
+  <!-- Lidar (MS200) -->
+  <xacro:property name="lidar_x"         value="0.108"/>
+  <xacro:property name="lidar_z"         value="0.112"/>
+
+  <!-- Kaamera -->
+  <xacro:property name="camera_x"        value="0.069"/>
+  <xacro:property name="camera_z"        value="0.031"/>
+
+  <!-- Gazebo pluginate laadimine (eraldi fail) -->
+  <xacro:arg name="use_sim" default="false"/>
+  <xacro:include filename="$(find minu_description)/urdf/gazebo_plugins.xacro"/>
+
+  <!-- ============================================================ -->
+  <!-- Inertsia makrod                                              -->
+  <!-- ============================================================ -->
+  <xacro:macro name="box_inertia" params="m x y z">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${m*(y*y+z*z)/12}" ixy="0" ixz="0"
+               iyy="${m*(x*x+z*z)/12}" iyz="0"
+               izz="${m*(x*x+y*y)/12}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="cylinder_inertia" params="m r l">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${m*(3*r*r+l*l)/12}" ixy="0" ixz="0"
+               iyy="${m*(3*r*r+l*l)/12}" iyz="0"
+               izz="${m*r*r/2}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- ============================================================ -->
+  <!-- Ratta makro                                                  -->
+  <!-- ============================================================ -->
+  <xacro:macro name="wheel" params="name x y">
+    <link name="${name}_link">
+      <visual>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <material name="dark_grey">
+          <color rgba="0.2 0.2 0.2 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+      <xacro:cylinder_inertia m="${wheel_mass}" r="${wheel_radius}" l="${wheel_width}"/>
+    </link>
+
+    <joint name="${name}_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${name}_link"/>
+      <origin xyz="${x} ${y} 0" rpy="${-pi/2} 0 0"/>
+      <axis xyz="0 0 1"/>
+      <dynamics damping="0.01" friction="0.1"/>
+    </joint>
+
+    <gazebo reference="${name}_link">
+      <mu1>1.5</mu1>
+      <mu2>1.5</mu2>
+      <kp>1e6</kp>
+      <kd>100</kd>
+      <material>Gazebo/DarkGrey</material>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- ============================================================ -->
+  <!-- base_footprint (maapinnal)                                   -->
+  <!-- ============================================================ -->
+  <link name="base_footprint"/>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 ${wheel_radius}"/>
+  </joint>
+
+  <!-- ============================================================ -->
+  <!-- base_link (roboti kere)                                      -->
+  <!-- ============================================================ -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 ${mesh_offset_z}" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://minu_description/meshes/base_link_visual.stl"/>
+      </geometry>
+      <material name="robot_pink">
+        <color rgba="1.0 0.1 0.7 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${mesh_offset_z}" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://minu_description/meshes/base_link_collision.stl"/>
+      </geometry>
+    </collision>
+    <xacro:box_inertia m="${body_mass}" x="${body_length}" y="${body_width}" z="${body_height}"/>
+  </link>
+
+  <gazebo reference="base_link">
+    <material>Gazebo/Purple</material>
+  </gazebo>
+
+  <!-- ============================================================ -->
+  <!-- Rattad (4WD skid-steer)                                     -->
+  <!-- ============================================================ -->
+  <xacro:wheel name="front_left_wheel"  x="${wheelbase/2}"  y="${track_width/2}"/>
+  <xacro:wheel name="front_right_wheel" x="${wheelbase/2}"  y="${-track_width/2}"/>
+  <xacro:wheel name="rear_left_wheel"   x="${-wheelbase/2}" y="${track_width/2}"/>
+  <xacro:wheel name="rear_right_wheel"  x="${-wheelbase/2}" y="${-track_width/2}"/>
+
+  <!-- ============================================================ -->
+  <!-- Lidar (MS200 2D laserskanner)                                -->
+  <!-- ============================================================ -->
+  <link name="laser_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.025" length="0.030"/>
+      </geometry>
+      <material name="lidar_black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.025" length="0.030"/>
+      </geometry>
+    </collision>
+    <xacro:cylinder_inertia m="0.1" r="0.025" l="0.030"/>
+  </link>
+
+  <joint name="laser_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser_link"/>
+    <origin xyz="${lidar_x} 0 ${lidar_z}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ============================================================ -->
+  <!-- Kaamera (2MP USB)                                            -->
+  <!-- ============================================================ -->
+  <link name="camera_link">
+    <visual>
+      <geometry>
+        <box size="0.015 0.030 0.015"/>
+      </geometry>
+      <material name="camera_black">
+        <color rgba="0.05 0.05 0.05 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.015 0.030 0.015"/>
+      </geometry>
+    </collision>
+    <xacro:box_inertia m="0.02" x="0.015" y="0.030" z="0.015"/>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="${camera_x} 0 ${camera_z}" rpy="0 0 0"/>
+  </joint>
+
+  <link name="camera_optical_link"/>
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_optical_link"/>
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+  </joint>
+
+  <!-- ============================================================ -->
+  <!-- IMU (kiirendusandur + gyroskoop)                             -->
+  <!-- ============================================================ -->
+  <link name="imu_link">
+    <visual>
+      <geometry>
+        <box size="0.010 0.010 0.003"/>
+      </geometry>
+      <material name="imu_green">
+        <color rgba="0.0 0.6 0.0 1.0"/>
+      </material>
+    </visual>
+    <xacro:box_inertia m="0.01" x="0.010" y="0.010" z="0.003"/>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 0.01" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ============================================================ -->
+  <!-- ANALÜÜSI ÜLESANDED                                          -->
+  <!-- ============================================================ -->
+  <!--
+  Ülesanne 1: Ava see fail ja vasta küsimustele:
+    1. Mitu link'i on mudelis? (vihje: grep -c '<link name=')
+    2. Mitu joint'i? Mis tüüpi on ratta joint'id ja miks?
+    3. Mis vahe on visual ja collision geomeetrial?
+    4. Miks on base_footprint eraldi base_link'ist?
+
+  Ülesanne 2: Visualiseeri ja uuri TF puud:
+    1. Käivita: ros2 launch minu_description display.launch.py
+    2. RViz2-s: lülita sisse TF display, uuri koordinaatsüsteeme
+    3. Genereeri TF puu: ros2 run tf2_tools view_frames
+    4. Selgita: kuidas laser_link asukoht base_link suhtes
+       mõjutab /scan andmete tõlgendamist?
+
+  Ülesanne 3: Võrdle URDF ja PROTO rolli:
+    1. Vaata PROTO: /workspace/ros2_ws/src/yahboom_webots/protos/YahboomRobot.proto
+    2. Vaata URDF:  /workspace/ros2_ws/src/yahboom_webots/resource/yahboom_webots.urdf
+    3. Selgita: mis infot annab PROTO Webots'ile ja mis infot annab URDF ROS 2-le?
+    4. Miks on mõlemat vaja?
+  -->
+
+</robot>

@@ -1,0 +1,104 @@
+{
+  "tests": [
+    {
+      "name": "URDF fail eksisteerib",
+      "setup": "",
+      "run": "test -f minu_description/urdf/yahboom_robot.urdf.xacro",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 5
+    },
+    {
+      "name": "package.xml on korrektne (nimi = minu_description)",
+      "setup": "",
+      "run": "grep -q '<name>minu_description</name>' minu_description/package.xml",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 5
+    },
+    {
+      "name": "CMakeLists.txt projekti nimi korrektne",
+      "setup": "",
+      "run": "grep -q 'project(minu_description)' minu_description/CMakeLists.txt",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 5
+    },
+    {
+      "name": "URDF on korrektne XML",
+      "setup": "",
+      "run": "python3 -c \"import xml.etree.ElementTree as ET; ET.parse('minu_description/urdf/yahboom_robot.urdf.xacro')\"",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 10
+    },
+    {
+      "name": "URDF sisaldab base_link ja base_footprint",
+      "setup": "",
+      "run": "grep -q 'name=\"base_link\"' minu_description/urdf/yahboom_robot.urdf.xacro && grep -q 'name=\"base_footprint\"' minu_description/urdf/yahboom_robot.urdf.xacro",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 5
+    },
+    {
+      "name": "URDF sisaldab laser_link ja camera_link",
+      "setup": "",
+      "run": "grep -q 'name=\"laser_link\"' minu_description/urdf/yahboom_robot.urdf.xacro && grep -q 'name=\"camera_link\"' minu_description/urdf/yahboom_robot.urdf.xacro",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 5
+    },
+    {
+      "name": "Uus andur lisatud (sonar_link voi muu uus link)",
+      "setup": "",
+      "run": "python3 .github/tests/test_urdf.py",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 20
+    },
+    {
+      "name": "Launch fail viitab minu_description paketile",
+      "setup": "",
+      "run": "grep -q 'minu_description' minu_description/launch/display.launch.py",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 5
+    },
+    {
+      "name": "Vastuste fail olemas (vastused_moodul02.md)",
+      "setup": "",
+      "run": "python3 -c \"import glob; files = glob.glob('vastused*') + glob.glob('VASTUSED*'); assert len(files) > 0, 'Vastuste faili ei leitud'\"",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 10
+    },
+    {
+      "name": "Vastuste fail ei ole tyhi (vahemalt 100 tahemarki)",
+      "setup": "",
+      "run": "python3 -c \"import glob, os; files = glob.glob('vastused*') + glob.glob('VASTUSED*'); assert files, 'Faili pole'; size = os.path.getsize(files[0]); assert size >= 100, f'Fail on liiga lyhike ({size} baiti)'\"",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 10
+    }
+  ]
+}
