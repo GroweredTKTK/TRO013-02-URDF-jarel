@@ -106,3 +106,9 @@ TRO013-02-URDF-jarel/
 ├── vastused_moodul02.md               ← sinu vastused
 └── .github/                           ← hindamine (ära muuda)
 ```
+
+---
+
+## Küsimused ja lisainfo
+
+Kui midagi on ebaselge või vajad täiendavat selgitust, vaata Moodle kursuse **Moodul 02: Roboti kirjeldav mudel (URDF / Xacro)** peatükki — seal on üksikasjalikud juhised, näidiskood ja selgitused.
