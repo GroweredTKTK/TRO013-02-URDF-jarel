@@ -2,9 +2,9 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>minu_description</name>
-  <version>0.1.0</version>
-  <description>MOBROS moodul 2: Roboti URDF/Xacro mudel (tudengi koopia)</description>
-  <maintainer email="student@tktk.ee">student</maintainer>
+  <version>1.0.0</version>
+  <description>Yahboom MicroROS Pi5 robot description (URDF/xacro)</description>
+  <maintainer email="ros@mobros.local">ros</maintainer>
   <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

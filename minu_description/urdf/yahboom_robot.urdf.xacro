@@ -28,7 +28,7 @@
 
   <!-- Gazebo pluginate laadimine (eraldi fail) -->
   <xacro:arg name="use_sim" default="false"/>
-  <xacro:include filename="$(find minu_description)/urdf/gazebo_plugins.xacro"/>
+  <xacro:include filename="$(find yahboom_description)/urdf/gazebo_plugins.xacro"/>
 
   <!-- ============================================================ -->
   <!-- Inertsia makrod                                              -->
@@ -107,7 +107,7 @@
     <visual>
       <origin xyz="0 0 ${mesh_offset_z}" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://minu_description/meshes/base_link_visual.stl"/>
+        <mesh filename="package://yahboom_description/meshes/base_link_visual.stl"/>
       </geometry>
       <material name="robot_pink">
         <color rgba="1.0 0.1 0.7 1.0"/>
@@ -116,7 +116,7 @@
     <collision>
       <origin xyz="0 0 ${mesh_offset_z}" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://minu_description/meshes/base_link_collision.stl"/>
+        <mesh filename="package://yahboom_description/meshes/base_link_collision.stl"/>
       </geometry>
     </collision>
     <xacro:box_inertia m="${body_mass}" x="${body_length}" y="${body_width}" z="${body_height}"/>
@@ -214,69 +214,29 @@
     <origin xyz="0 0 0.01" rpy="0 0 0"/>
   </joint>
 
-  <!-- ============================================================ -->
-  <!-- TODO: LISA SIIA OMA UUS ANDUR                               -->
-  <!-- ============================================================ -->
-  <!--
-  Lisa robotile uus andur (nt ultraheli, bumper vms). Vaja on:
+<link name="sonar_link">
+  <visual>
+    <geometry>
+      <cylinder radius="0.008" length="0.015"/>
+    </geometry>
+    <material name="sonar_silver">
+      <color rgba="0.7 0.7 0.7 1.0"/>
+    </material>
+  </visual>
 
-  1. UUS LINK — anduri füüsiline kehaosa:
-     <link name="sonar_link">
-       <visual>
-         <geometry>
-           <cylinder radius="0.008" length="0.015"/>   (voi box/sphere)
-         </geometry>
-         <material name="sonar_silver">
-           <color rgba="0.7 0.7 0.7 1.0"/>
-         </material>
-       </visual>
-       <collision>
-         <geometry>
-           <cylinder radius="0.008" length="0.015"/>
-         </geometry>
-       </collision>
-       <xacro:cylinder_inertia m="0.01" r="0.008" l="0.015"/>
-     </link>
+  <collision>
+    <geometry>
+      <cylinder radius="0.008" length="0.015"/>
+    </geometry>
+  </collision>
 
-  2. UUS JOINT — uhendab anduri base_link-iga:
-     <joint name="sonar_joint" type="fixed">
-       <parent link="base_link"/>
-       <child link="sonar_link"/>
-       <origin xyz="0.08 0 0.03" rpy="0 0 0"/>
-     </joint>
+  <xacro:cylinder_inertia m="0.01" r="0.008" l="0.015"/>
+</link>
 
-  Parast lisamist:
-    cd /workspace/ros2_ws
-    colcon build --packages-select minu_description
-    source install/setup.bash
-    ros2 launch minu_description display.launch.py
-  -->
-
-  <!-- TODO: eemalda see kommentaar ja lisa oma link + joint SIIA -->
-
-
-  <!-- ============================================================ -->
-  <!-- ANALUUSI ULESANDED (vasta vastused_moodul02.md failis)       -->
-  <!-- ============================================================ -->
-  <!--
-  Ülesanne 1: Ava see fail ja vasta küsimustele:
-    1. Mitu link'i on mudelis? (vihje: grep -c '<link name=')
-    2. Mitu joint'i? Mis tüüpi on ratta joint'id ja miks?
-    3. Mis vahe on visual ja collision geomeetrial?
-    4. Miks on base_footprint eraldi base_link'ist?
-
-  Ülesanne 2: Visualiseeri ja uuri TF puud:
-    1. Käivita: ros2 launch minu_description display.launch.py
-    2. RViz2-s: lülita sisse TF display, uuri koordinaatsüsteeme
-    3. Genereeri TF puu: ros2 run tf2_tools view_frames
-    4. Selgita: kuidas laser_link asukoht base_link suhtes
-       mõjutab /scan andmete tõlgendamist?
-
-  Ülesanne 3: Võrdle URDF ja PROTO rolli:
-    1. Vaata PROTO: /workspace/ros2_ws/src/yahboom_webots/protos/YahboomRobot.proto
-    2. Vaata URDF:  /workspace/ros2_ws/src/yahboom_webots/resource/yahboom_webots.urdf
-    3. Selgita: mis infot annab PROTO Webots'ile ja mis infot annab URDF ROS 2-le?
-    4. Miks on mõlemat vaja?
-  -->
+<joint name="sonar_joint" type="fixed">
+  <parent link="base_link"/>
+  <child link="sonar_link"/>
+  <origin xyz="0.08 0 0.03" rpy="0 0 0"/>
+</joint>
 
 </robot>
